@@ -1,36 +1,53 @@
 import axios from "axios";
 
 // ================= BASE URL =================
-const API = "https://project-manager-3bzs.onrender.com/api";
+// 🔥 FORCE correct API URL (fixes 404 issue)
+const API =
+  process.env.REACT_APP_API_URL?.includes("/api")
+    ? process.env.REACT_APP_API_URL
+    : "https://project-manager-3bzs.onrender.com/api";
 
 // ================= AXIOS INSTANCE =================
 const api = axios.create({
   baseURL: API,
+  timeout: 30000, // ⏱ increased for Render cold start
 });
 
-// ================= REQUEST INTERCEPTOR (AUTO TOKEN) =================
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+// ================= REQUEST INTERCEPTOR =================
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
-  return config;
-});
+    // 🔍 Debug (remove later if needed)
+    console.log("➡️ API CALL:", `${config.baseURL}${config.url}`);
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // ================= RESPONSE INTERCEPTOR =================
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    console.log("❌ API ERROR:", err.response?.data || err.message);
+    console.error("❌ API ERROR:", err.response?.data || err.message);
 
+    // 🔐 Auto logout on token expiry
     if (err.response?.status === 401) {
       localStorage.clear();
       window.location.href = "/";
     }
 
-    return Promise.reject(err);
+    const message =
+      err.response?.data?.message ||
+      err.message ||
+      "Something went wrong";
+
+    return Promise.reject(new Error(message));
   }
 );
 
@@ -47,7 +64,9 @@ export const createProject = (data) => api.post("/projects", data);
 
 // ================= TASKS =================
 export const getTasks = () => api.get("/tasks");
+
 export const createTask = (data) => api.post("/tasks", data);
+
 export const updateTask = (id, data) =>
   api.put(`/tasks/${id}`, data);
 

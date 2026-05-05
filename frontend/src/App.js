@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // ✅ ADD THIS
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
@@ -6,13 +8,25 @@ import Dashboard from "./pages/Dashboard";
 // 🔐 Protected Route Component
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-
   return token ? children : <Navigate to="/" replace />;
 };
 
 function App() {
   return (
     <BrowserRouter>
+
+      {/* ✅ TOASTER (GLOBAL) */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#020617",
+            color: "#fff",
+            border: "1px solid #334155",
+          },
+        }}
+      />
+
       <Routes>
 
         {/* Public Routes */}

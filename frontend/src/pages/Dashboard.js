@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
 import {
   getTasks,
   createTask,
-  updateTask,
   getProjects,
   createProject,
   getUsers,
@@ -14,7 +15,6 @@ import TaskCard from "../components/TaskCard";
 import Footer from "../components/Footer";
 
 export default function Dashboard() {
-  // ================= STATE =================
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const role = localStorage.getItem("role");
 
-  // ================= FETCH DATA =================
+  // ================= FETCH =================
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -40,15 +40,14 @@ export default function Dashboard() {
       const [taskRes, projectRes, userRes] = await Promise.all([
         getTasks(),
         getProjects(),
-        getUsers().catch(() => ({ data: [] })), // safe fallback
+        getUsers().catch(() => ({ data: [] })),
       ]);
 
       setTasks(taskRes.data);
       setProjects(projectRes.data);
       setUsers(userRes.data);
     } catch (err) {
-      console.log("ERROR:", err.response?.data);
-      alert("Failed to load data");
+      toast.error(err.message || "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -60,17 +59,19 @@ export default function Dashboard() {
 
   // ================= CREATE TASK =================
   const handleCreate = async () => {
-    if (!title || !projectId) {
-      return alert("Title and project required");
+    if (!title.trim() || !projectId) {
+      return toast.error("Title & Project required");
     }
 
     try {
       await createTask({
-        title,
+        title: title.trim(),
         project: projectId,
         assignedTo,
         dueDate,
       });
+
+      toast.success("Task created 🎉");
 
       setTitle("");
       setProjectId("");
@@ -78,31 +79,22 @@ export default function Dashboard() {
       setDueDate("");
 
       fetchData();
-    } catch {
-      alert("Failed to create task");
+    } catch (err) {
+      toast.error(err.message || "Task creation failed");
     }
   };
 
   // ================= CREATE PROJECT =================
   const handleCreateProject = async () => {
-    if (!newProject) return;
+    if (!newProject.trim()) return;
 
     try {
-      await createProject({ name: newProject });
+      await createProject({ name: newProject.trim() });
+      toast.success("Project created");
       setNewProject("");
       fetchData();
-    } catch {
-      alert("Failed to create project");
-    }
-  };
-
-  // ================= UPDATE =================
-  const markDone = async (id) => {
-    try {
-      await updateTask(id, { status: "done" });
-      fetchData();
-    } catch {
-      alert("Failed to update task");
+    } catch (err) {
+      toast.error(err.message || "Failed to create project");
     }
   };
 
@@ -113,57 +105,44 @@ export default function Dashboard() {
       (!projectFilter || t.project?._id === projectFilter)
   );
 
-  // ================= STATS =================
-  const total = tasks.length;
-  const completed = tasks.filter((t) => t.status === "done").length;
-  const overdue = tasks.filter(
-    (t) => t.dueDate && new Date(t.dueDate) < new Date()
-  ).length;
+  // ================= LOADING UI =================
+  if (loading) {
+    return (
+      <div className="container">
+        <h2>Loading dashboard...</h2>
+      </div>
+    );
+  }
 
-  // ================= UI =================
   return (
     <div className="app-layout">
-      
-      {/* SIDEBAR */}
       <Sidebar
         projects={projects}
         setProjectFilter={setProjectFilter}
       />
 
-      {/* MAIN AREA */}
       <div className="main-area">
-
-        {/* TOPBAR */}
         <Topbar search={search} setSearch={setSearch} />
 
-        {/* CONTENT */}
         <div className="container">
-
-          {/* HEADER */}
           <h2>📊 Dashboard</h2>
 
-          {/* STATS */}
-          <div className="card">
-            <p>Total Tasks: {total}</p>
-            <p style={{ color: "#22c55e" }}>
-              Completed: {completed}
+          {/* ACTIVE FILTER */}
+          {projectFilter && (
+            <p style={{ marginBottom: "10px", color: "#38bdf8" }}>
+              Filtering by selected project
             </p>
-            <p style={{ color: "#ef4444" }}>
-              Overdue: {overdue}
-            </p>
-          </div>
+          )}
 
-          {/* ADMIN: CREATE PROJECT */}
+          {/* CREATE PROJECT */}
           {role === "admin" && (
             <div className="card">
               <h3>Create Project</h3>
-
               <input
                 value={newProject}
                 onChange={(e) => setNewProject(e.target.value)}
                 placeholder="Project name"
               />
-
               <button onClick={handleCreateProject}>
                 Add Project
               </button>
@@ -197,11 +176,15 @@ export default function Dashboard() {
               onChange={(e) => setAssignedTo(e.target.value)}
             >
               <option value="">Assign User</option>
-              {users.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
-              ))}
+              {users.length === 0 ? (
+                <option>No users</option>
+              ) : (
+                users.map((u) => (
+                  <option key={u._id} value={u._id}>
+                    {u.name}
+                  </option>
+                ))
+              )}
             </select>
 
             <input
@@ -213,51 +196,52 @@ export default function Dashboard() {
             <button onClick={handleCreate}>Add Task</button>
           </div>
 
-          {/* FILTERS */}
-          <div className="card">
-            <input
-              placeholder="🔍 Search tasks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          {/* KANBAN BOARD */}
+          <div className="kanban-board">
 
-            <select
-              value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-            >
-              <option value="">All Projects</option>
-              {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            {/* TODO */}
+            <div className="kanban-column">
+              <h3>📝 Todo</h3>
+              {filteredTasks.filter((t) => t.status === "todo").length === 0 && (
+                <p style={{ color: "#94a3b8" }}>No tasks</p>
+              )}
+              {filteredTasks
+                .filter((t) => t.status === "todo")
+                .map((task) => (
+                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
+                ))}
+            </div>
+
+            {/* IN PROGRESS */}
+            <div className="kanban-column">
+              <h3>🚧 In Progress</h3>
+              {filteredTasks.filter((t) => t.status === "in-progress").length === 0 && (
+                <p style={{ color: "#94a3b8" }}>No tasks</p>
+              )}
+              {filteredTasks
+                .filter((t) => t.status === "in-progress")
+                .map((task) => (
+                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
+                ))}
+            </div>
+
+            {/* DONE */}
+            <div className="kanban-column">
+              <h3>✅ Done</h3>
+              {filteredTasks.filter((t) => t.status === "done").length === 0 && (
+                <p style={{ color: "#94a3b8" }}>No tasks</p>
+              )}
+              {filteredTasks
+                .filter((t) => t.status === "done")
+                .map((task) => (
+                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
+                ))}
+            </div>
+
           </div>
-
-          {/* LOADING */}
-          {loading && <p>Loading...</p>}
-
-          {/* EMPTY STATE */}
-          {!loading && filteredTasks.length === 0 && (
-            <div className="card">No tasks found</div>
-          )}
-
-          {/* TASK GRID */}
-          <div className="task-grid">
-            {filteredTasks.map((task) => (
-              <TaskCard
-                key={task._id}
-                task={task}
-                onDone={markDone}
-              />
-            ))}
-          </div>
-
         </div>
 
-        {/* FOOTER */}
         <Footer />
-
       </div>
     </div>
   );

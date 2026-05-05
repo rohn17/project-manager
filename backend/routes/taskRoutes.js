@@ -4,22 +4,24 @@ const router = express.Router();
 const {
   createTask,
   getTasks,
-  updateTask,   // ✅ ADD
-  deleteTask,   // ✅ ADD
+  updateTask,
+  deleteTask,
 } = require("../controllers/taskController");
 
 const { protect } = require("../middleware/authMiddleware");
 
-// CREATE
+// ================= TASK ROUTES =================
+
+// Create Task
 router.post("/", protect, createTask);
 
-// GET
+// Get All Tasks
 router.get("/", protect, getTasks);
 
-// ✅ UPDATE (VERY IMPORTANT)
+// Update Task
 router.put("/:id", protect, updateTask);
 
-// ✅ DELETE (optional but useful)
+// Delete Task
 router.delete("/:id", protect, deleteTask);
 
 module.exports = router;

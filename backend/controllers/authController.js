@@ -9,39 +9,28 @@ exports.signup = async (req, res) => {
   try {
     let { name, email, password, role, adminKey } = req.body;
 
-    // ================= VALIDATION =================
     if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Normalize email
     email = email.toLowerCase();
 
-    // ================= CHECK EXISTING =================
-    const existingUser = await User.findOne({ email });
+    // ⚡ faster query
+    const existingUser = await User.findOne({ email }).lean();
+
     if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // ================= HASH PASSWORD =================
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ⚡ REDUCED SALT ROUNDS (FAST)
+    const hashedPassword = await bcrypt.hash(password, 8);
 
-    // ================= ROLE SECURITY =================
     let userRole = "member";
 
-    // Allow admin only with secret key
-    if (
-      role === "admin" &&
-      adminKey === process.env.ADMIN_SECRET
-    ) {
+    if (role === "admin" && adminKey === process.env.ADMIN_SECRET) {
       userRole = "admin";
     }
 
-    // ================= CREATE USER =================
     const user = await User.create({
       name,
       email,
@@ -61,10 +50,7 @@ exports.signup = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Signup Error:", error.message);
-
-    res.status(500).json({
-      message: "Signup failed",
-    });
+    res.status(500).json({ message: "Signup failed" });
   }
 };
 
@@ -73,36 +59,32 @@ exports.signup = async (req, res) => {
 // ======================
 exports.login = async (req, res) => {
   try {
+    console.time("LOGIN"); // ⏱ debug
+
     let { email, password } = req.body;
 
-    // ================= VALIDATION =================
     if (!email || !password) {
       return res.status(400).json({
         message: "Email and password are required",
       });
     }
 
-    // Normalize email
     email = email.toLowerCase();
 
-    // ================= FIND USER =================
-    const user = await User.findOne({ email });
+    // ⚡ lean = faster
+    const user = await User.findOne({ email }).lean();
+
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // ================= PASSWORD CHECK =================
+    // ⚡ compare
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // ================= TOKEN =================
     const token = jwt.sign(
       {
         id: user._id,
@@ -112,7 +94,8 @@ exports.login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // ================= RESPONSE =================
+    console.timeEnd("LOGIN"); // ⏱ debug
+
     res.status(200).json({
       message: "Login successful",
       token,
@@ -126,9 +109,6 @@ exports.login = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Login Error:", error.message);
-
-    res.status(500).json({
-      message: "Login failed",
-    });
+    res.status(500).json({ message: "Login failed" });
   }
 };

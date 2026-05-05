@@ -1,21 +1,21 @@
 const jwt = require("jsonwebtoken");
 
 exports.protect = (req, res, next) => {
-  let token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    return res.status(401).json("No token, access denied");
+  // Check if header exists and starts with Bearer
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token, access denied" });
   }
 
   try {
-    // Remove "Bearer "
-    token = token.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded; // contains id & role
+    req.user = decoded; // id + role
     next();
   } catch (err) {
-    res.status(401).json("Invalid token");
+    return res.status(401).json({ message: "Invalid token" });
   }
 };

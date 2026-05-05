@@ -1,70 +1,245 @@
-# Getting Started with Create React App
+🚀 Project Manager (MERN Stack)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack Project & Task Management Web App built using the MERN stack (MongoDB, Express, React, Node.js).
+This app allows users to manage projects, assign tasks, track progress, and collaborate efficiently.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+🌐 Live Demo
 
-### `npm start`
+Frontend: https://your-frontend-url.vercel.app
+Backend API: https://your-backend-url.up.railway.app
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+✨ Features
 
-### `npm test`
+🔐 Authentication
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* User Signup & Login (JWT-based)
+* Role-based access (Admin / Member)
 
-### `npm run build`
+📁 Project Management
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* Create and manage projects
+* View all projects in sidebar
+* Assign users to projects
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+✅ Task Management
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* Create tasks with:
 
-### `npm run eject`
+  * Title
+  * Assigned user
+  * Project
+  * Due date
+* Update task status:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  * Todo
+  * In Progress
+  * Done
+* Edit & delete tasks
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+📊 Dashboard
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+* Kanban-style board (Trello-like)
+* Tasks grouped by status
+* Overdue task highlighting
+* Search & filter tasks
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+🎨 UI/UX
 
-## Learn More
+* Modern Glassmorphism design
+* Responsive layout
+* Smooth animations
+* Toast notifications
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+🛠 Tech Stack
 
-### Code Splitting
+Frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+* React.js
+* Axios
+* React Router
+* React Hot Toast
 
-### Analyzing the Bundle Size
+Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+* Node.js
+* Express.js
+* MongoDB (Mongoose)
+* JWT Authentication
 
-### Making a Progressive Web App
+Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+* Frontend: Vercel
+* Backend: Railway
+* Database: MongoDB Atlas
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+📂 Project Structure
 
-### Deployment
+project-manager/
+│
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   └── server.js
+│
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   └── App.js
+│
+└── README.md
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+⚙️ Installation & Setup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1️⃣ Clone Repository
+
+git clone https://github.com/your-username/project-manager.git
+cd project-manager
+
+---
+
+2️⃣ Backend Setup
+
+cd backend
+npm install
+
+Create .env file:
+
+PORT=5000
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret
+ADMIN_SECRET=your_admin_secret
+
+Run backend:
+
+npm start
+
+---
+
+3️⃣ Frontend Setup
+
+cd frontend
+npm install
+
+Create .env:
+
+REACT_APP_API_URL=https://your-backend-url/api
+
+Run frontend:
+
+npm start
+
+---
+
+🚀 Deployment
+
+Backend (Railway)
+
+* Connect GitHub repo
+* Add environment variables
+* Deploy
+* Generate public domain
+
+Frontend (Vercel)
+
+* Import GitHub repo
+* Set root directory = frontend
+* Add environment variable:
+  REACT_APP_API_URL
+* Deploy
+
+---
+
+🧪 API Endpoints
+
+Auth
+
+* POST /api/auth/signup
+* POST /api/auth/login
+
+Users
+
+* GET /api/users
+
+Projects
+
+* GET /api/projects
+* POST /api/projects
+
+Tasks
+
+* GET /api/tasks
+* POST /api/tasks
+* PUT /api/tasks/:id
+* DELETE /api/tasks/:id
+
+---
+
+🔐 Security
+
+* JWT-based authentication
+* Protected routes
+* Environment variables for secrets
+* Password hashing using bcrypt
+
+---
+
+📸 Screenshots
+
+* Login Page
+* Dashboard
+* Kanban Board
+* Task Cards
+
+---
+
+🤝 Contribution
+
+Contributions are welcome!
+
+Fork → Create Branch → Commit → Push → Pull Request
+
+---
+
+🧑‍💻 Author
+
+Rohan Choudhary
+
+---
+
+📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+⭐ Acknowledgements
+
+* MongoDB Atlas
+* Railway
+* Vercel
+* React Community
+
+---
+
+🚀 Future Improvements
+
+* Drag & Drop tasks
+* Notifications system
+* Dark/Light theme toggle
+* Real-time updates (Socket.io)
+* File attachments
+
+---

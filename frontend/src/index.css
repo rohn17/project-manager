@@ -1334,3 +1334,301 @@ button:hover {
   }
 
 }
+/* =========================================================
+   MOBILE RESPONSIVE FIX
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-left {
+    position: relative;
+
+    top: 0;
+  }
+
+  .kanban-board {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* ================= TABLET ================= */
+
+@media (max-width: 992px) {
+
+  .sidebar {
+    width: 90px;
+
+    padding: 18px 10px;
+  }
+
+  .main-area {
+    margin-left: 90px;
+
+    width: calc(100% - 90px);
+  }
+
+  .logo h2,
+  .logo p,
+  .user-info,
+  .project-header,
+  .boost-card,
+  .logout-btn span {
+    display: none;
+  }
+
+  .menu-item {
+    justify-content: center;
+
+    padding: 16px 10px;
+
+    font-size: 22px;
+  }
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .topbar {
+    padding: 0 18px;
+  }
+
+  .topbar-search {
+    max-width: 220px;
+  }
+
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  /* SIDEBAR */
+
+  .sidebar {
+    display: none;
+  }
+
+  /* MAIN */
+
+  .main-area {
+    margin-left: 0;
+
+    width: 100%;
+  }
+
+  /* CONTAINER */
+
+  .container {
+    padding: 16px;
+  }
+
+  /* TOPBAR */
+
+  .topbar {
+    height: auto;
+
+    padding: 16px;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 16px;
+  }
+
+  .topbar-left,
+  .topbar-right {
+    width: 100%;
+
+    justify-content: space-between;
+  }
+
+  .topbar-center {
+    width: 100%;
+  }
+
+  .topbar-search {
+    max-width: 100%;
+  }
+
+  .topbar-heading h2 {
+    font-size: 22px;
+  }
+
+  .topbar-heading p {
+    font-size: 12px;
+  }
+
+  .topbar-user-info h4 {
+    font-size: 14px;
+  }
+
+  .topbar-user-info p {
+    font-size: 11px;
+  }
+
+  .topbar-logout {
+    padding: 10px 14px;
+
+    font-size: 13px;
+  }
+
+  /* DASHBOARD */
+
+  .dashboard-title h1 {
+    font-size: 34px;
+  }
+
+  .dashboard-title p {
+    font-size: 15px;
+  }
+
+  /* STATS */
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-card h2 {
+    font-size: 34px;
+  }
+
+  /* GRID */
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* LEFT PANEL */
+
+  .dashboard-left {
+    position: relative;
+
+    top: 0;
+  }
+
+  /* KANBAN */
+
+  .kanban-board {
+    grid-template-columns: 1fr;
+
+    gap: 18px;
+  }
+
+  .kanban-column {
+    min-height: auto;
+
+    padding: 18px;
+  }
+
+  .kanban-column h3 {
+    font-size: 22px;
+  }
+
+  /* TASK CARD */
+
+  .task-card {
+    min-height: auto;
+
+    padding: 18px;
+  }
+
+  .task-title {
+    font-size: 18px;
+  }
+
+  .task-meta-item {
+    font-size: 14px;
+  }
+
+  .task-actions {
+    flex-wrap: wrap;
+  }
+
+  .task-actions button {
+    min-width: 44px;
+
+    flex: 1;
+  }
+
+  /* AUTH */
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  .auth-title {
+    font-size: 30px;
+  }
+
+  /* FOOTER */
+
+  .footer {
+    flex-direction: column;
+
+    gap: 12px;
+
+    text-align: center;
+
+    padding: 18px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+
+    justify-content: center;
+  }
+
+}
+
+/* ================= SMALL MOBILE ================= */
+
+@media (max-width: 480px) {
+
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .dashboard-title h1 {
+    font-size: 28px;
+  }
+
+  .topbar-heading h2 {
+    font-size: 18px;
+  }
+
+  .stats-card h2 {
+    font-size: 28px;
+  }
+
+  .task-title {
+    font-size: 16px;
+  }
+
+  .task-actions button {
+    height: 40px;
+
+    font-size: 13px;
+  }
+
+  .topbar-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .topbar-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+}

@@ -15,41 +15,89 @@ import TaskCard from "../components/TaskCard";
 import Footer from "../components/Footer";
 
 export default function Dashboard() {
-  const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [users, setUsers] = useState([]);
 
-  const [title, setTitle] = useState("");
-  const [projectId, setProjectId] = useState("");
-  const [assignedTo, setAssignedTo] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  // ================= STATES =================
 
-  const [search, setSearch] = useState("");
-  const [projectFilter, setProjectFilter] = useState("");
+  const [tasks, setTasks] =
+    useState([]);
 
-  const [newProject, setNewProject] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [projects, setProjects] =
+    useState([]);
 
-  const role = localStorage.getItem("role");
+  const [users, setUsers] =
+    useState([]);
 
-  // ================= FETCH =================
+  // TASK FORM
+  const [title, setTitle] =
+    useState("");
+
+  const [projectId, setProjectId] =
+    useState("");
+
+  const [assignedTo, setAssignedTo] =
+    useState("");
+
+  const [dueDate, setDueDate] =
+    useState("");
+
+  // FILTERS
+  const [search, setSearch] =
+    useState("");
+
+  const [projectFilter,
+    setProjectFilter] =
+    useState("");
+
+  // PROJECT FORM
+  const [newProject,
+    setNewProject] =
+    useState("");
+
+  // LOADING
+  const [loading, setLoading] =
+    useState(false);
+
+  // ROLE
+  const role =
+    localStorage.getItem("role");
+
+  // ================= FETCH DATA =================
+
   const fetchData = async () => {
+
     try {
+
       setLoading(true);
 
-      const [taskRes, projectRes, userRes] = await Promise.all([
+      const [
+        taskRes,
+        projectRes,
+        userRes,
+      ] = await Promise.all([
         getTasks(),
         getProjects(),
-        getUsers().catch(() => ({ data: [] })),
+        getUsers().catch(() => ({
+          data: [],
+        })),
       ]);
 
       setTasks(taskRes.data);
+
       setProjects(projectRes.data);
+
       setUsers(userRes.data);
+
     } catch (err) {
-      toast.error(err.message || "Failed to load data");
+
+      toast.error(
+        err.message ||
+        "Failed to load dashboard"
+      );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
@@ -58,191 +106,528 @@ export default function Dashboard() {
   }, []);
 
   // ================= CREATE TASK =================
-  const handleCreate = async () => {
-    if (!title.trim() || !projectId) {
-      return toast.error("Title & Project required");
-    }
 
-    try {
-      await createTask({
-        title: title.trim(),
-        project: projectId,
-        assignedTo,
-        dueDate,
-      });
+  const handleCreateTask =
+    async () => {
 
-      toast.success("Task created 🎉");
+      if (
+        !title.trim() ||
+        !projectId
+      ) {
 
-      setTitle("");
-      setProjectId("");
-      setAssignedTo("");
-      setDueDate("");
+        return toast.error(
+          "Task title & project required"
+        );
+      }
 
-      fetchData();
-    } catch (err) {
-      toast.error(err.message || "Task creation failed");
-    }
-  };
+      try {
+
+        await createTask({
+
+          title:
+            title.trim(),
+
+          project:
+            projectId,
+
+          assignedTo,
+
+          dueDate,
+        });
+
+        toast.success(
+          "Task created 🚀"
+        );
+
+        // RESET
+        setTitle("");
+        setProjectId("");
+        setAssignedTo("");
+        setDueDate("");
+
+        fetchData();
+
+      } catch (err) {
+
+        toast.error(
+          err.message ||
+          "Task creation failed"
+        );
+
+      }
+    };
 
   // ================= CREATE PROJECT =================
-  const handleCreateProject = async () => {
-    if (!newProject.trim()) return;
 
-    try {
-      await createProject({ name: newProject.trim() });
-      toast.success("Project created");
-      setNewProject("");
-      fetchData();
-    } catch (err) {
-      toast.error(err.message || "Failed to create project");
-    }
-  };
+  const handleCreateProject =
+    async () => {
 
-  // ================= FILTER =================
-  const filteredTasks = tasks.filter(
-    (t) =>
-      t.title.toLowerCase().includes(search.toLowerCase()) &&
-      (!projectFilter || t.project?._id === projectFilter)
-  );
+      if (!newProject.trim()) {
 
-  // ================= LOADING UI =================
+        return toast.error(
+          "Enter project name"
+        );
+      }
+
+      try {
+
+        await createProject({
+          name:
+            newProject.trim(),
+        });
+
+        toast.success(
+          "Project created 🎉"
+        );
+
+        setNewProject("");
+
+        fetchData();
+
+      } catch (err) {
+
+        toast.error(
+          err.message ||
+          "Project creation failed"
+        );
+
+      }
+    };
+
+  // ================= FILTER TASKS =================
+
+  const filteredTasks =
+    tasks.filter((task) => {
+
+      const matchesSearch =
+        task.title
+          .toLowerCase()
+          .includes(
+            search.toLowerCase()
+          );
+
+      const matchesProject =
+        !projectFilter ||
+        task.project?._id ===
+        projectFilter;
+
+      return (
+        matchesSearch &&
+        matchesProject
+      );
+    });
+
+  // ================= TASK GROUPS =================
+
+  const todoTasks =
+    filteredTasks.filter(
+      (task) =>
+        task.status === "todo"
+    );
+
+  const progressTasks =
+    filteredTasks.filter(
+      (task) =>
+        task.status ===
+        "in-progress"
+    );
+
+  const doneTasks =
+    filteredTasks.filter(
+      (task) =>
+        task.status === "done"
+    );
+
+  // ================= LOADING =================
+
   if (loading) {
+
     return (
-      <div className="container">
-        <h2>Loading dashboard...</h2>
+
+      <div className="loading-screen">
+
+        <div className="loader"></div>
+
+        <h2>
+          Loading Dashboard...
+        </h2>
+
       </div>
+
     );
   }
 
+  // ================= UI =================
+
   return (
+
     <div className="app-layout">
+
+      {/* SIDEBAR */}
       <Sidebar
         projects={projects}
-        setProjectFilter={setProjectFilter}
+        setProjectFilter={
+          setProjectFilter
+        }
       />
 
+      {/* MAIN */}
       <div className="main-area">
-        <Topbar search={search} setSearch={setSearch} />
 
+        {/* TOPBAR */}
+        <Topbar
+          search={search}
+          setSearch={setSearch}
+        />
+
+        {/* CONTAINER */}
         <div className="container">
-          <h2>📊 Dashboard</h2>
 
-          {/* ACTIVE FILTER */}
-          {projectFilter && (
-            <p style={{ marginBottom: "10px", color: "#38bdf8" }}>
-              Filtering by selected project
+          {/* TITLE */}
+          <div className="dashboard-title">
+
+            <h1>
+              🚀 Project Dashboard
+            </h1>
+
+            <p>
+              Manage projects,
+              tasks and workflow
+              with your modern
+              productivity workspace.
             </p>
-          )}
 
-          {/* CREATE PROJECT */}
-          {role === "admin" && (
-            <div className="card">
-              <h3>Create Project</h3>
-              <input
-                value={newProject}
-                onChange={(e) => setNewProject(e.target.value)}
-                placeholder="Project name"
-              />
-              <button onClick={handleCreateProject}>
-                Add Project
-              </button>
+          </div>
+
+          {/* STATS */}
+          <div className="stats-grid">
+
+            <div className="stats-card">
+
+              <h3>
+                📋 Total Tasks
+              </h3>
+
+              <h2>
+                {filteredTasks.length}
+              </h2>
+
             </div>
-          )}
 
-          {/* CREATE TASK */}
-          <div className="card">
-            <h3>Create Task</h3>
+            <div className="stats-card todo-card">
 
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Task title"
-            />
+              <h3>
+                📝 Todo
+              </h3>
 
-            <select
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-            >
-              <option value="">Select Project</option>
-              {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              <h2>
+                {todoTasks.length}
+              </h2>
 
-            <select
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-            >
-              <option value="">Assign User</option>
-              {users.length === 0 ? (
-                <option>No users</option>
-              ) : (
-                users.map((u) => (
-                  <option key={u._id} value={u._id}>
-                    {u.name}
+            </div>
+
+            <div className="stats-card progress-card">
+
+              <h3>
+                🚧 In Progress
+              </h3>
+
+              <h2>
+                {progressTasks.length}
+              </h2>
+
+            </div>
+
+            <div className="stats-card done-card">
+
+              <h3>
+                ✅ Done
+              </h3>
+
+              <h2>
+                {doneTasks.length}
+              </h2>
+
+            </div>
+
+          </div>
+
+          {/* GRID */}
+          <div className="dashboard-grid">
+
+            {/* LEFT */}
+            <div className="dashboard-left">
+
+              {/* CREATE PROJECT */}
+              {role === "admin" && (
+
+                <div className="card">
+
+                  <h2>
+                    📁 Create Project
+                  </h2>
+
+                  <input
+                    type="text"
+                    placeholder="Project name"
+                    value={newProject}
+                    onChange={(e) =>
+                      setNewProject(
+                        e.target.value
+                      )
+                    }
+                  />
+
+                  <button
+                    className="full-btn"
+                    onClick={
+                      handleCreateProject
+                    }
+                  >
+                    Create Project
+                  </button>
+
+                </div>
+
+              )}
+
+              {/* CREATE TASK */}
+              <div className="card">
+
+                <h2>
+                  ✅ Create Task
+                </h2>
+
+                <input
+                  type="text"
+                  placeholder="Task title"
+                  value={title}
+                  onChange={(e) =>
+                    setTitle(
+                      e.target.value
+                    )
+                  }
+                />
+
+                <select
+                  value={projectId}
+                  onChange={(e) =>
+                    setProjectId(
+                      e.target.value
+                    )
+                  }
+                >
+
+                  <option value="">
+                    Select Project
                   </option>
-                ))
+
+                  {projects.map(
+                    (project) => (
+
+                      <option
+                        key={
+                          project._id
+                        }
+                        value={
+                          project._id
+                        }
+                      >
+                        {project.name}
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
+                <select
+                  value={assignedTo}
+                  onChange={(e) =>
+                    setAssignedTo(
+                      e.target.value
+                    )
+                  }
+                >
+
+                  <option value="">
+                    Assign User
+                  </option>
+
+                  {users.map(
+                    (user) => (
+
+                      <option
+                        key={user._id}
+                        value={user._id}
+                      >
+                        {user.name}
+                      </option>
+
+                    )
+                  )}
+
+                </select>
+
+                <input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) =>
+                    setDueDate(
+                      e.target.value
+                    )
+                  }
+                />
+
+                <button
+                  className="full-btn"
+                  onClick={
+                    handleCreateTask
+                  }
+                >
+                  Add Task
+                </button>
+
+              </div>
+
+            </div>
+
+            {/* RIGHT */}
+            <div className="dashboard-right">
+
+              {/* FILTER */}
+              {projectFilter && (
+
+                <div className="card filter-card">
+
+                  🔎 Showing tasks
+                  for selected project
+
+                </div>
+
               )}
-            </select>
 
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
+              {/* BOARD */}
+              <div className="kanban-board">
 
-            <button onClick={handleCreate}>Add Task</button>
+                {/* TODO */}
+                <div className="kanban-column">
+
+                  <h3>
+                    📝 Todo
+                  </h3>
+
+                  {todoTasks.length > 0 ? (
+
+                    todoTasks.map(
+                      (task) => (
+
+                        <TaskCard
+                          key={
+                            task._id
+                          }
+                          task={task}
+                          onRefresh={
+                            fetchData
+                          }
+                        />
+
+                      )
+                    )
+
+                  ) : (
+
+                    <p className="empty-text">
+                      No tasks available
+                    </p>
+
+                  )}
+
+                </div>
+
+                {/* PROGRESS */}
+                <div className="kanban-column">
+
+                  <h3>
+                    🚧 In Progress
+                  </h3>
+
+                  {progressTasks.length > 0 ? (
+
+                    progressTasks.map(
+                      (task) => (
+
+                        <TaskCard
+                          key={
+                            task._id
+                          }
+                          task={task}
+                          onRefresh={
+                            fetchData
+                          }
+                        />
+
+                      )
+                    )
+
+                  ) : (
+
+                    <p className="empty-text">
+                      No tasks available
+                    </p>
+
+                  )}
+
+                </div>
+
+                {/* DONE */}
+                <div className="kanban-column">
+
+                  <h3>
+                    ✅ Done
+                  </h3>
+
+                  {doneTasks.length > 0 ? (
+
+                    doneTasks.map(
+                      (task) => (
+
+                        <TaskCard
+                          key={
+                            task._id
+                          }
+                          task={task}
+                          onRefresh={
+                            fetchData
+                          }
+                        />
+
+                      )
+                    )
+
+                  ) : (
+
+                    <p className="empty-text">
+                      No tasks available
+                    </p>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
           </div>
 
-          {/* KANBAN BOARD */}
-          <div className="kanban-board">
-
-            {/* TODO */}
-            <div className="kanban-column">
-              <h3>📝 Todo</h3>
-              {filteredTasks.filter((t) => t.status === "todo").length === 0 && (
-                <p style={{ color: "#94a3b8" }}>No tasks</p>
-              )}
-              {filteredTasks
-                .filter((t) => t.status === "todo")
-                .map((task) => (
-                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
-                ))}
-            </div>
-
-            {/* IN PROGRESS */}
-            <div className="kanban-column">
-              <h3>🚧 In Progress</h3>
-              {filteredTasks.filter((t) => t.status === "in-progress").length === 0 && (
-                <p style={{ color: "#94a3b8" }}>No tasks</p>
-              )}
-              {filteredTasks
-                .filter((t) => t.status === "in-progress")
-                .map((task) => (
-                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
-                ))}
-            </div>
-
-            {/* DONE */}
-            <div className="kanban-column">
-              <h3>✅ Done</h3>
-              {filteredTasks.filter((t) => t.status === "done").length === 0 && (
-                <p style={{ color: "#94a3b8" }}>No tasks</p>
-              )}
-              {filteredTasks
-                .filter((t) => t.status === "done")
-                .map((task) => (
-                  <TaskCard key={task._id} task={task} onRefresh={fetchData} />
-                ))}
-            </div>
-
-          </div>
         </div>
 
+        {/* FOOTER */}
         <Footer />
+
       </div>
+
     </div>
   );
 }

@@ -1,110 +1,248 @@
 import { useState } from "react";
 import { login } from "../services/api";
-import { useNavigate, Link } from "react-router-dom";
+
+import {
+  useNavigate,
+  Link,
+} from "react-router-dom";
+
+import toast from "react-hot-toast";
 
 export default function Login() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
 
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // ================= STATE =================
 
-  const navigate = useNavigate();
+  const [form, setForm] =
+    useState({
+      email: "",
+      password: "",
+    });
+
+  const [show, setShow] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const navigate =
+    useNavigate();
 
   // ================= HANDLE INPUT =================
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+
+    const {
+      name,
+      value,
+    } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // ================= LOGIN =================
-  const handleLogin = async (e) => {
-    e.preventDefault();
 
-    if (!form.email || !form.password) {
-      return alert("Please fill all fields");
-    }
+  const handleLogin =
+    async (e) => {
 
-    try {
-      setLoading(true);
+      e.preventDefault();
 
-      const res = await login(form);
+      // PREVENT MULTIPLE CLICKS
+      if (loading) return;
 
-      // ✅ STORE DATA
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", res.data.user.role);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      // VALIDATION
+      if (
+        !form.email.trim() ||
+        !form.password.trim()
+      ) {
 
-      // ✅ REDIRECT
-      navigate("/dashboard");
+        return toast.error(
+          "Please fill all fields"
+        );
+      }
 
-    } catch (err) {
-      alert(err.response?.data?.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+
+        setLoading(true);
+
+        // API CALL
+        const res =
+          await login({
+            email:
+              form.email.trim(),
+
+            password:
+              form.password.trim(),
+          });
+
+        // STORE DATA
+        localStorage.setItem(
+          "token",
+          res.data.token
+        );
+
+        localStorage.setItem(
+          "role",
+          res.data.user.role
+        );
+
+        localStorage.setItem(
+          "name",
+          res.data.user.name
+        );
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(
+            res.data.user
+          )
+        );
+
+        // SUCCESS
+        toast.success(
+          "Login successful 🎉"
+        );
+
+        // REDIRECT
+        navigate("/dashboard");
+
+      } catch (err) {
+
+        toast.error(
+          err.message ||
+          "Invalid credentials"
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    };
 
   // ================= UI =================
+
   return (
+
     <div className="auth-wrapper">
 
-      {/* GLOW BACKGROUND */}
+      {/* GLOW */}
       <div className="auth-glow"></div>
 
+      {/* CARD */}
       <div className="auth-card">
 
         {/* HEADER */}
-        <h2 className="auth-title">🚀 Welcome Back</h2>
-        <p className="auth-subtitle">
-          Login to continue managing your projects
-        </p>
+        <div className="auth-header">
+
+          <h1 className="auth-title">
+            🚀 Welcome Back
+          </h1>
+
+          <p className="auth-subtitle">
+            Login to continue managing
+            your projects and tasks
+          </p>
+
+        </div>
 
         {/* FORM */}
-        <form onSubmit={handleLogin} className="auth-form">
+        <form
+          onSubmit={handleLogin}
+          className="auth-form"
+        >
 
           {/* EMAIL */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={form.email}
-            onChange={handleChange}
-          />
+          <div className="input-wrapper">
 
-          {/* PASSWORD */}
-          <div className="input-group">
+            <label htmlFor="email">
+              Email
+            </label>
+
             <input
-              type={show ? "text" : "password"}
-              name="password"
-              placeholder="Enter your password"
-              value={form.password}
+              id="email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="Enter your email"
+              value={form.email}
               onChange={handleChange}
             />
 
-            <span
-              className="toggle-password"
-              onClick={() => setShow(!show)}
-            >
-              {show ? "🙈" : "👁"}
-            </span>
+          </div>
+
+          {/* PASSWORD */}
+          <div className="input-wrapper">
+
+            <label htmlFor="password">
+              Password
+            </label>
+
+            <div className="input-group">
+
+              <input
+                id="password"
+                type={
+                  show
+                    ? "text"
+                    : "password"
+                }
+                name="password"
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                value={form.password}
+                onChange={handleChange}
+              />
+
+              <span
+                className="toggle-password"
+                onClick={() =>
+                  setShow(!show)
+                }
+              >
+                {show
+                  ? "🙈"
+                  : "👁"}
+              </span>
+
+            </div>
+
           </div>
 
           {/* BUTTON */}
-          <button className="auth-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          <button
+            type="submit"
+            className="auth-btn"
+            disabled={loading}
+          >
+
+            {loading
+              ? "Logging in..."
+              : "Login"}
+
           </button>
 
         </form>
 
         {/* FOOTER */}
-        <p className="auth-link">
-          Don’t have an account?{" "}
-          <Link to="/signup">Create one</Link>
-        </p>
+        <div className="auth-footer">
+
+          <p className="auth-link">
+
+            Don’t have an account?{" "}
+
+            <Link to="/signup">
+              Create one
+            </Link>
+
+          </p>
+
+        </div>
 
       </div>
+
     </div>
   );
 }

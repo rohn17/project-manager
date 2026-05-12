@@ -1335,8 +1335,15 @@ button:hover {
 
 }
 /* =========================================================
-   MOBILE RESPONSIVE FIX
+   FINAL MOBILE RESPONSIVE FIX
 ========================================================= */
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* ================= LARGE TABLET ================= */
 
 @media (max-width: 1200px) {
 
@@ -1361,30 +1368,29 @@ button:hover {
 @media (max-width: 992px) {
 
   .sidebar {
-    width: 90px;
+    width: 82px;
 
     padding: 18px 10px;
   }
 
   .main-area {
-    margin-left: 90px;
+    margin-left: 82px;
 
-    width: calc(100% - 90px);
+    width: calc(100% - 82px);
   }
 
   .logo h2,
   .logo p,
   .user-info,
   .project-header,
-  .boost-card,
-  .logout-btn span {
+  .boost-card {
     display: none;
   }
 
   .menu-item {
     justify-content: center;
 
-    padding: 16px 10px;
+    padding: 15px 10px;
 
     font-size: 22px;
   }
@@ -1394,27 +1400,19 @@ button:hover {
       repeat(2, 1fr);
   }
 
-  .topbar {
-    padding: 0 18px;
-  }
-
-  .topbar-search {
-    max-width: 220px;
-  }
-
 }
 
 /* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
 
-  /* SIDEBAR */
+  /* REMOVE SIDEBAR */
 
   .sidebar {
     display: none;
   }
 
-  /* MAIN */
+  /* MAIN AREA */
 
   .main-area {
     margin-left: 0;
@@ -1425,7 +1423,7 @@ button:hover {
   /* CONTAINER */
 
   .container {
-    padding: 16px;
+    padding: 14px;
   }
 
   /* TOPBAR */
@@ -1443,17 +1441,22 @@ button:hover {
   }
 
   .topbar-left,
+  .topbar-center,
   .topbar-right {
     width: 100%;
+  }
 
+  .topbar-left {
+    justify-content: flex-start;
+  }
+
+  .topbar-right {
     justify-content: space-between;
   }
 
-  .topbar-center {
-    width: 100%;
-  }
-
   .topbar-search {
+    width: 100%;
+
     max-width: 100%;
   }
 
@@ -1465,12 +1468,28 @@ button:hover {
     font-size: 12px;
   }
 
+  .topbar-user {
+    gap: 10px;
+  }
+
   .topbar-user-info h4 {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .topbar-user-info p {
     font-size: 11px;
+  }
+
+  .topbar-avatar {
+    width: 38px;
+    height: 38px;
+
+    font-size: 14px;
+  }
+
+  .topbar-logo {
+    width: 40px;
+    height: 40px;
   }
 
   .topbar-logout {
@@ -1479,33 +1498,43 @@ button:hover {
     font-size: 13px;
   }
 
-  /* DASHBOARD */
+  /* TITLE */
 
   .dashboard-title h1 {
-    font-size: 34px;
+    font-size: 32px;
+
+    line-height: 1.3;
   }
 
   .dashboard-title p {
     font-size: 15px;
+
+    line-height: 1.7;
   }
 
   /* STATS */
 
   .stats-grid {
     grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+  .stats-card {
+    padding: 20px;
   }
 
   .stats-card h2 {
-    font-size: 34px;
+    font-size: 32px;
   }
 
   /* GRID */
 
   .dashboard-grid {
     grid-template-columns: 1fr;
-  }
 
-  /* LEFT PANEL */
+    gap: 18px;
+  }
 
   .dashboard-left {
     position: relative;
@@ -1524,7 +1553,9 @@ button:hover {
   .kanban-column {
     min-height: auto;
 
-    padding: 18px;
+    padding: 16px;
+
+    border-radius: 20px;
   }
 
   .kanban-column h3 {
@@ -1536,35 +1567,73 @@ button:hover {
   .task-card {
     min-height: auto;
 
-    padding: 18px;
+    padding: 16px;
+
+    border-radius: 20px;
   }
 
   .task-title {
     font-size: 18px;
+
+    line-height: 1.5;
+  }
+
+  .task-meta {
+    gap: 10px;
   }
 
   .task-meta-item {
     font-size: 14px;
-  }
 
-  .task-actions {
     flex-wrap: wrap;
   }
 
+  /* ACTIONS */
+
+  .task-actions {
+    flex-wrap: wrap;
+
+    gap: 8px;
+  }
+
   .task-actions button {
+    flex: 1;
+
     min-width: 44px;
 
-    flex: 1;
+    height: 42px;
+
+    font-size: 13px;
+  }
+
+  /* FORMS */
+
+  input,
+  select,
+  textarea {
+    padding: 13px 14px;
+
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
   }
 
   /* AUTH */
 
   .auth-card {
-    padding: 28px 22px;
+    padding: 26px 20px;
+
+    border-radius: 24px;
   }
 
   .auth-title {
     font-size: 30px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
   }
 
   /* FOOTER */
@@ -1572,17 +1641,19 @@ button:hover {
   .footer {
     flex-direction: column;
 
-    gap: 12px;
-
     text-align: center;
+
+    gap: 10px;
 
     padding: 18px;
   }
 
   .footer-links {
+    justify-content: center;
+
     flex-wrap: wrap;
 
-    justify-content: center;
+    gap: 14px;
   }
 
 }
@@ -1592,15 +1663,23 @@ button:hover {
 @media (max-width: 480px) {
 
   .container {
-    padding: 12px;
+    padding: 10px;
   }
 
   .card {
-    padding: 18px;
+    padding: 16px;
   }
 
   .dashboard-title h1 {
-    font-size: 28px;
+    font-size: 26px;
+  }
+
+  .dashboard-title p {
+    font-size: 14px;
+  }
+
+  .topbar {
+    padding: 14px;
   }
 
   .topbar-heading h2 {
@@ -1608,7 +1687,11 @@ button:hover {
   }
 
   .stats-card h2 {
-    font-size: 28px;
+    font-size: 26px;
+  }
+
+  .kanban-column h3 {
+    font-size: 18px;
   }
 
   .task-title {
@@ -1616,19 +1699,19 @@ button:hover {
   }
 
   .task-actions button {
-    height: 40px;
+    height: 38px;
 
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .topbar-avatar {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
   }
 
   .topbar-logo {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
   }
 
 }

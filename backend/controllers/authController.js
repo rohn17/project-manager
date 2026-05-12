@@ -7,30 +7,81 @@ const jwt = require("jsonwebtoken");
 // ======================
 exports.signup = async (req, res) => {
   try {
-    let { name, email, password, role, adminKey } = req.body;
 
+    // ================= GET DATA =================
+    let {
+      name,
+      email,
+      password,
+      role,
+      adminKey,
+    } = req.body;
+
+    // ================= DEBUG LOGS =================
+    console.log("BODY:", req.body);
+    console.log("ROLE:", role);
+    console.log("ADMIN KEY:", adminKey);
+    console.log("ENV SECRET:", process.env.ADMIN_SECRET);
+
+    // ================= VALIDATION =================
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
 
-    email = email.toLowerCase();
+    // ================= FORMAT EMAIL =================
+    email = email.toLowerCase().trim();
 
-    // ⚡ faster query
+    // ================= CHECK EXISTING USER =================
     const existingUser = await User.findOne({ email }).lean();
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+      });
     }
 
-    // ⚡ REDUCED SALT ROUNDS (FAST)
-    const hashedPassword = await bcrypt.hash(password, 8);
-
+    // ================= DEFAULT ROLE =================
     let userRole = "member";
 
-    if (role === "admin" && adminKey === process.env.ADMIN_SECRET) {
+    // ================= ADMIN SECURITY =================
+    if (role === "admin") {
+
+      // Check admin key exists
+      if (!adminKey) {
+        return res.status(403).json({
+          success: false,
+          message: "Admin secret key is required",
+        });
+      }
+
+      // Remove extra spaces
+      const cleanAdminKey = adminKey.trim();
+
+      // Check admin key matches
+      if (cleanAdminKey !== process.env.ADMIN_SECRET) {
+
+        console.log("❌ Admin key mismatch");
+
+        return res.status(403).json({
+          success: false,
+          message: "Invalid admin secret key",
+        });
+      }
+
+      // Make admin
       userRole = "admin";
+
+      console.log("✅ ADMIN CREATED");
     }
 
+    // ================= HASH PASSWORD =================
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ================= CREATE USER =================
     const user = await User.create({
       name,
       email,
@@ -38,7 +89,9 @@ exports.signup = async (req, res) => {
       role: userRole,
     });
 
+    // ================= SUCCESS RESPONSE =================
     res.status(201).json({
+      success: true,
       message: "User registered successfully",
       user: {
         _id: user._id,
@@ -49,8 +102,13 @@ exports.signup = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Signup Error:", error.message);
-    res.status(500).json({ message: "Signup failed" });
+
+    console.error("❌ Signup Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Signup failed",
+    });
   }
 };
 
@@ -59,44 +117,62 @@ exports.signup = async (req, res) => {
 // ======================
 exports.login = async (req, res) => {
   try {
-    console.time("LOGIN"); // ⏱ debug
+
+    console.time("LOGIN");
 
     let { email, password } = req.body;
 
+    // ================= VALIDATION =================
     if (!email || !password) {
       return res.status(400).json({
+        success: false,
         message: "Email and password are required",
       });
     }
 
-    email = email.toLowerCase();
+    // ================= FORMAT EMAIL =================
+    email = email.toLowerCase().trim();
 
-    // ⚡ lean = faster
+    // ================= FIND USER =================
     const user = await User.findOne({ email }).lean();
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    // ⚡ compare
-    const isMatch = await bcrypt.compare(password, user.password);
+    // ================= CHECK PASSWORD =================
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
     }
 
+    // ================= GENERATE TOKEN =================
     const token = jwt.sign(
       {
         id: user._id,
         role: user.role,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      {
+        expiresIn: "1d",
+      }
     );
 
-    console.timeEnd("LOGIN"); // ⏱ debug
+    console.timeEnd("LOGIN");
 
+    // ================= SUCCESS RESPONSE =================
     res.status(200).json({
+      success: true,
       message: "Login successful",
       token,
       user: {
@@ -108,7 +184,12 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Login Error:", error.message);
-    res.status(500).json({ message: "Login failed" });
+
+    console.error("❌ Login Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Login failed",
+    });
   }
 };

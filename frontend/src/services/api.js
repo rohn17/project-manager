@@ -1,74 +1,153 @@
 import axios from "axios";
 
 // ================= BASE URL =================
-// 🔥 FORCE correct API URL (fixes 404 issue)
-const API =
-  process.env.REACT_APP_API_URL?.includes("/api")
-    ? process.env.REACT_APP_API_URL
-    : "https://project-manager-3bzs.onrender.com/api";
+const BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  "https://project-manager-3bzs.onrender.com/api";
 
 // ================= AXIOS INSTANCE =================
 const api = axios.create({
-  baseURL: API,
-  timeout: 30000, // ⏱ increased for Render cold start
+  baseURL: BASE_URL,
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 // ================= REQUEST INTERCEPTOR =================
 api.interceptors.request.use(
   (config) => {
+
+    // Get token
     const token = localStorage.getItem("token");
 
+    // Add token if exists
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // 🔍 Debug (remove later if needed)
-    console.log("➡️ API CALL:", `${config.baseURL}${config.url}`);
+    // ================= DEBUG =================
+    console.log("➡️ API URL:", `${config.baseURL}${config.url}`);
+    console.log("➡️ REQUEST DATA:", config.data);
 
     return config;
+
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error("❌ REQUEST ERROR:", error);
+
+    return Promise.reject(error);
+  }
 );
 
 // ================= RESPONSE INTERCEPTOR =================
 api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    console.error("❌ API ERROR:", err.response?.data || err.message);
 
-    // 🔐 Auto logout on token expiry
-    if (err.response?.status === 401) {
-      localStorage.clear();
+  // Success
+  (response) => {
+
+    console.log("✅ API RESPONSE:", response.data);
+
+    return response;
+  },
+
+  // Error
+  (error) => {
+
+    console.error(
+      "❌ API ERROR:",
+      error.response?.data || error.message
+    );
+
+    // Auto logout if token invalid
+    if (error.response?.status === 401) {
+
+      localStorage.removeItem("token");
+
+      // Redirect to login
       window.location.href = "/";
     }
 
-    const message =
-      err.response?.data?.message ||
-      err.message ||
-      "Something went wrong";
-
-    return Promise.reject(new Error(message));
+    return Promise.reject(error);
   }
 );
 
 // ================= AUTH =================
-export const signup = (data) => api.post("/auth/signup", data);
-export const login = (data) => api.post("/auth/login", data);
+
+// SIGNUP
+export const signup = async (data) => {
+
+  console.log("🔥 SIGNUP PAYLOAD:", data);
+
+  return await api.post(
+    "/auth/signup",
+    {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role: data.role,
+      adminKey: data.adminKey,
+    }
+  );
+};
+
+// LOGIN
+export const login = async (data) => {
+
+  return await api.post(
+    "/auth/login",
+    data
+  );
+};
 
 // ================= USERS =================
-export const getUsers = () => api.get("/users");
+export const getUsers = async () => {
+  return await api.get("/users");
+};
 
 // ================= PROJECTS =================
-export const getProjects = () => api.get("/projects");
-export const createProject = (data) => api.post("/projects", data);
+
+// GET PROJECTS
+export const getProjects = async () => {
+  return await api.get("/projects");
+};
+
+// CREATE PROJECT
+export const createProject = async (data) => {
+  return await api.post(
+    "/projects",
+    data
+  );
+};
 
 // ================= TASKS =================
-export const getTasks = () => api.get("/tasks");
 
-export const createTask = (data) => api.post("/tasks", data);
+// GET TASKS
+export const getTasks = async () => {
+  return await api.get("/tasks");
+};
 
-export const updateTask = (id, data) =>
-  api.put(`/tasks/${id}`, data);
+// CREATE TASK
+export const createTask = async (data) => {
+  return await api.post(
+    "/tasks",
+    data
+  );
+};
 
-export const deleteTask = (id) =>
-  api.delete(`/tasks/${id}`);
+// UPDATE TASK
+export const updateTask = async (id, data) => {
+  return await api.put(
+    `/tasks/${id}`,
+    data
+  );
+};
+
+// DELETE TASK
+export const deleteTask = async (id) => {
+  return await api.delete(
+    `/tasks/${id}`
+  );
+};
+
+export default api;

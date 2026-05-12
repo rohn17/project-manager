@@ -3,59 +3,98 @@ import { signup } from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Signup() {
+
+  // ================= STATES =================
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: "member",
-    adminKey: "", // ✅ NEW
+    adminKey: "",
   });
 
-  const [show, setShow] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   // ================= HANDLE INPUT =================
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    console.log("INPUT:", e.target.name, e.target.value);
+
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  // ================= SIGNUP =================
+  // ================= HANDLE SIGNUP =================
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.email || !form.password) {
+    const name = form.name.trim();
+    const email = form.email.trim().toLowerCase();
+
+    // ================= VALIDATION =================
+    if (!name || !email || !form.password || !form.confirmPassword) {
       return alert("Please fill all fields");
+    }
+
+    if (form.password.length < 6) {
+      return alert("Password must be at least 6 characters");
     }
 
     if (form.password !== form.confirmPassword) {
       return alert("Passwords do not match");
     }
 
-    // ✅ Admin validation
+    // ================= ADMIN VALIDATION =================
     if (form.role === "admin" && !form.adminKey) {
-      return alert("Admin key is required for admin signup");
+      return alert("Admin secret key is required");
     }
 
     try {
+
       setLoading(true);
 
-      await signup({
-        name: form.name,
-        email: form.email,
+      // ================= DEBUG =================
+      console.log("FORM DATA:", form);
+
+      // ================= API CALL =================
+      const response = await signup({
+        name,
+        email,
         password: form.password,
         role: form.role,
-        adminKey: form.adminKey, // ✅ send key
+        adminKey: form.adminKey,
       });
 
-      alert("Signup successful! Please login.");
+      alert(response?.data?.message || "Signup successful!");
+
+      // ================= RESET FORM =================
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "member",
+        adminKey: "",
+      });
+
+      // ================= REDIRECT =================
       navigate("/");
 
     } catch (err) {
-      alert(err.response?.data?.message || "Signup failed");
+
+      console.error("Signup Error:", err);
+
+      alert(
+        err.response?.data?.message ||
+        "Signup failed. Please try again."
+      );
+
     } finally {
       setLoading(false);
     }
@@ -70,6 +109,7 @@ export default function Signup() {
 
         {/* HEADER */}
         <h2 className="auth-title">✨ Create Account</h2>
+
         <p className="auth-subtitle">
           Start managing your projects efficiently
         </p>
@@ -84,6 +124,7 @@ export default function Signup() {
             placeholder="Enter your name"
             value={form.name}
             onChange={handleChange}
+            autoComplete="off"
           />
 
           {/* EMAIL */}
@@ -93,6 +134,7 @@ export default function Signup() {
             placeholder="Enter your email"
             value={form.email}
             onChange={handleChange}
+            autoComplete="off"
           />
 
           {/* ROLE */}
@@ -106,54 +148,67 @@ export default function Signup() {
             <option value="admin">👑 Admin</option>
           </select>
 
-          {/* ✅ ADMIN KEY (ONLY IF ADMIN) */}
+          {/* ADMIN KEY */}
           {form.role === "admin" && (
             <input
-              type="text"
+              type="password"
               name="adminKey"
               placeholder="Enter admin secret key"
               value={form.adminKey}
               onChange={handleChange}
+              autoComplete="off"
             />
           )}
 
           {/* PASSWORD */}
           <div className="input-group">
+
             <input
-              type={show ? "text" : "password"}
+              type={showPassword ? "text" : "password"}
               name="password"
               placeholder="Create password"
               value={form.password}
               onChange={handleChange}
             />
+
             <span
               className="toggle-password"
-              onClick={() => setShow(!show)}
+              onClick={() => setShowPassword(!showPassword)}
             >
-              {show ? "🙈" : "👁"}
+              {showPassword ? "🙈" : "👁"}
             </span>
+
           </div>
 
           {/* CONFIRM PASSWORD */}
           <div className="input-group">
+
             <input
-              type={showConfirm ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               placeholder="Confirm password"
               value={form.confirmPassword}
               onChange={handleChange}
             />
+
             <span
               className="toggle-password"
-              onClick={() => setShowConfirm(!showConfirm)}
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
             >
-              {showConfirm ? "🙈" : "👁"}
+              {showConfirmPassword ? "🙈" : "👁"}
             </span>
+
           </div>
 
           {/* BUTTON */}
-          <button className="auth-btn" disabled={loading}>
-            {loading ? "Creating account..." : "Signup"}
+          <button
+            type="submit"
+            className="auth-btn"
+            disabled={loading}
+          >
+            {loading ? "Creating Account..." : "Signup"}
           </button>
 
         </form>

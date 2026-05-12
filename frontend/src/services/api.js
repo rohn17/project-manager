@@ -1,9 +1,9 @@
 import axios from "axios";
 
 // ================= BASE URL =================
+// ✅ Railway Backend URL
 const BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  "https://project-manager-3bzs.onrender.com/api";
+  "https://project-manager-production-d033.up.railway.app/api";
 
 // ================= AXIOS INSTANCE =================
 const api = axios.create({
@@ -18,7 +18,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
 
-    // Get token
+    // Get token from localStorage
     const token = localStorage.getItem("token");
 
     // Add token if exists
@@ -27,14 +27,25 @@ api.interceptors.request.use(
     }
 
     // ================= DEBUG =================
-    console.log("➡️ API URL:", `${config.baseURL}${config.url}`);
-    console.log("➡️ REQUEST DATA:", config.data);
+    console.log(
+      "➡️ API URL:",
+      `${config.baseURL}${config.url}`
+    );
+
+    console.log(
+      "➡️ REQUEST DATA:",
+      config.data
+    );
 
     return config;
 
   },
   (error) => {
-    console.error("❌ REQUEST ERROR:", error);
+
+    console.error(
+      "❌ REQUEST ERROR:",
+      error
+    );
 
     return Promise.reject(error);
   }
@@ -43,15 +54,18 @@ api.interceptors.request.use(
 // ================= RESPONSE INTERCEPTOR =================
 api.interceptors.response.use(
 
-  // Success
+  // ================= SUCCESS =================
   (response) => {
 
-    console.log("✅ API RESPONSE:", response.data);
+    console.log(
+      "✅ API RESPONSE:",
+      response.data
+    );
 
     return response;
   },
 
-  // Error
+  // ================= ERROR =================
   (error) => {
 
     console.error(
@@ -59,12 +73,11 @@ api.interceptors.response.use(
       error.response?.data || error.message
     );
 
-    // Auto logout if token invalid
+    // Auto logout if token expired
     if (error.response?.status === 401) {
 
       localStorage.removeItem("token");
 
-      // Redirect to login
       window.location.href = "/";
     }
 
@@ -77,7 +90,10 @@ api.interceptors.response.use(
 // SIGNUP
 export const signup = async (data) => {
 
-  console.log("🔥 SIGNUP PAYLOAD:", data);
+  console.log(
+    "🔥 SIGNUP PAYLOAD:",
+    data
+  );
 
   return await api.post(
     "/auth/signup",
@@ -102,6 +118,7 @@ export const login = async (data) => {
 
 // ================= USERS =================
 export const getUsers = async () => {
+
   return await api.get("/users");
 };
 
@@ -109,11 +126,13 @@ export const getUsers = async () => {
 
 // GET PROJECTS
 export const getProjects = async () => {
+
   return await api.get("/projects");
 };
 
 // CREATE PROJECT
 export const createProject = async (data) => {
+
   return await api.post(
     "/projects",
     data
@@ -124,11 +143,13 @@ export const createProject = async (data) => {
 
 // GET TASKS
 export const getTasks = async () => {
+
   return await api.get("/tasks");
 };
 
 // CREATE TASK
 export const createTask = async (data) => {
+
   return await api.post(
     "/tasks",
     data
@@ -137,6 +158,7 @@ export const createTask = async (data) => {
 
 // UPDATE TASK
 export const updateTask = async (id, data) => {
+
   return await api.put(
     `/tasks/${id}`,
     data
@@ -145,6 +167,7 @@ export const updateTask = async (id, data) => {
 
 // DELETE TASK
 export const deleteTask = async (id) => {
+
   return await api.delete(
     `/tasks/${id}`
   );
